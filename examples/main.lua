@@ -1,10 +1,10 @@
 #!/usr/bin/env lua
 
 --[[
- @filename  test.lua
+ @filename  main.lua
  @version   1.0
  @autor     Máster Vitronic <mastervitronic@gmail.com>
- @date      Fri Mar 12 03:47:42 -04 2021
+ @date      lun oct 16 09:50:42 -04 2023
  @licence   MIT licence
 ]]--
 
