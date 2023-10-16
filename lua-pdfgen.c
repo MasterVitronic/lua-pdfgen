@@ -474,6 +474,44 @@ static int l_pdf_add_text_wrap( lua_State * L ) {
 }
 
 /**
+ * Add a text string to the document at a rotated angle
+ * @param page Page to add object to (NULL => most recently added page)
+ * @param text String to display
+ * @param size Point size of the font
+ * @param xoff X location to put it in
+ * @param yoff Y location to put it in
+ * @param angle Rotation angle of text (in radians)
+ * @param colour Colour to draw the text
+ * @return 0 on success, < 0 on failure
+ */
+static int l_pdf_add_text_rotate( lua_State * L ) {
+  ctx_t *ctx = ctx_check(L, 1);
+  struct pdf_object *page = NULL;
+  if ( lua_islightuserdata(L, 2) ){
+    page = lua_touserdata(L, 2);
+  }
+  const char *text = luaL_checkstring(L, 3);
+  float size       = luaL_checknumber(L, 4);
+  float xoff       = luaL_checknumber(L, 5);
+  float yoff       = luaL_checknumber(L, 6);
+  float angle      = luaL_checknumber(L, 7);
+  uint32_t colour  = luaL_checknumber(L, 8);
+
+  int result = pdf_add_text_rotate(
+    ctx->pdf,page,text,size,xoff,yoff,
+    angle,colour
+  );
+
+  if ( result < 0 ){
+    lua_pushboolean(L, 0);
+  }else if (result == 0) {
+    lua_pushboolean(L, 1);
+  }
+
+  return 1;
+}
+
+/**
  * Save the given pdf document to the supplied filename.
  * @param filename Name of the file to store the PDF into (NULL for stdout)
  * @return false on failure, true on success
@@ -670,6 +708,7 @@ static const struct luaL_Reg meths [] = {
   {"add_bookmark", l_pdf_add_bookmark},
   {"get_page", l_pdf_get_page},
   {"add_text_wrap", l_pdf_add_text_wrap},
+  {"add_text_rotate", l_pdf_add_text_rotate},
   {"add_filled_rectangle", l_pdf_add_filled_rectangle},
   {"get_font_text_width", l_pdf_get_font_text_width},
   {"add_line", l_pdf_add_line},
