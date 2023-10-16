@@ -14,5 +14,6 @@ style='!pale'
 kind_names={topic='Manual',script='Programs'}
 examples = {
     '../examples/main.lua',
+    '../examples/grid.lua',
     '../examples/massive_file.lua'
 }
