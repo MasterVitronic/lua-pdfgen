@@ -392,8 +392,9 @@ static int l_pdf_add_bookmark( lua_State * L ) {
   return 1;
 }
 
-/**
+/***
  * Add a link annotation to the document
+ * @function add_link 
  * @param page Page that holds the clickable rectangle
                (or NULL for the most recently added page)
  * @param x X coordinate of bottom LHS corner of clickable rectangle
@@ -403,7 +404,7 @@ static int l_pdf_add_bookmark( lua_State * L ) {
  * @param target_page Page to jump to for link
  * @param target_x X coordinate to position at the left of the view
  * @param target_y Y coordinate to position at the top of the view
- * @return false on failure, new bookmark id on success
+ * @treturn boolean false on failure, new bookmark id on success
  */
 static int l_pdf_add_link( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
