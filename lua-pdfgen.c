@@ -393,6 +393,48 @@ static int l_pdf_add_bookmark( lua_State * L ) {
 }
 
 /**
+ * Add a link annotation to the document
+ * @param page Page that holds the clickable rectangle
+               (or NULL for the most recently added page)
+ * @param x X coordinate of bottom LHS corner of clickable rectangle
+ * @param y Y coordinate of bottom LHS corner of clickable rectangle
+ * @param width width of clickable rectangle
+ * @param height height of clickable rectangle
+ * @param target_page Page to jump to for link
+ * @param target_x X coordinate to position at the left of the view
+ * @param target_y Y coordinate to position at the top of the view
+ * @return false on failure, new bookmark id on success
+ */
+static int l_pdf_add_link( lua_State * L ) {
+  ctx_t *ctx = ctx_check(L, 1);
+  struct pdf_object *page = NULL;
+  if ( lua_islightuserdata(L, 2) ){
+    page = lua_touserdata(L, 2);
+  }
+  float x  = luaL_checknumber(L, 3);
+  float y  = luaL_checknumber(L, 4);
+  float width  = luaL_checknumber(L, 5);
+  float height  = luaL_checknumber(L, 6);
+  struct pdf_object *target_page = lua_touserdata(L, 7);
+  float target_x  = luaL_checknumber(L, 8);
+  float target_y  = luaL_checknumber(L, 9);
+
+ int result = pdf_add_link(
+    ctx->pdf, page, x, y,
+    width,height, target_page,
+    target_x,target_y
+  );
+
+  if ( result < 0 ){
+    lua_pushboolean(L, 0);
+  }else{
+    lua_pushinteger(L, result);
+  }
+
+  return 1;
+}
+
+/**
  * Add a new page to the given pdf
  * @return NULL on failure, new page object on success
  */
@@ -706,6 +748,7 @@ static const struct luaL_Reg meths [] = {
   {"height", l_pdf_height},
   {"width", l_pdf_width},
   {"add_bookmark", l_pdf_add_bookmark},
+  {"add_link", l_pdf_add_link},
   {"get_page", l_pdf_get_page},
   {"add_text_wrap", l_pdf_add_text_wrap},
   {"add_text_rotate", l_pdf_add_text_rotate},
