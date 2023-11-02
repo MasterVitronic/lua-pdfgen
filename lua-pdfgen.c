@@ -59,6 +59,11 @@ static ctx_t * ctx_check(lua_State *L, int i) {
 	return (ctx_t *) luaL_checkudata(L, i, PDFGEN);
 }
 
+/**
+ * Initializes the library
+ * @function new
+ * @treturn object the object pdfgen
+ */
 static int l_new (lua_State *L) {
   ctx_t *ctx = (ctx_t *)lua_newuserdata(L, sizeof(ctx_t));
   ctx->L = L;
@@ -68,11 +73,11 @@ static int l_new (lua_State *L) {
 }
 
 /**
- * Create a new PDF object, with the given page
- * width/height
+ * Create a new PDF object, with the given page width/height
+ * @function create
  * @param width Width of the page
  * @param height Height of the page
- * @param info Optional information to be put into the PDF header
+ * @param table info Optional information to be put into the PDF header
  */
 static int l_pdf_create( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -126,12 +131,13 @@ static int l_pdf_create( lua_State * L ) {
  * this function is not called.
  * Note: The font selection should be done before text is output,
  * and will remain until pdf_set_font is called again.
+ * @function set_font
  * @param font New font to use. This must be one of the standard PDF fonts:
  *  Courier, Courier-Bold, Courier-BoldOblique, Courier-Oblique,
  *  Helvetica, Helvetica-Bold, Helvetica-BoldOblique, Helvetica-Oblique,
  *  Times-Roman, Times-Bold, Times-Italic, Times-BoldItalic,
  *  Symbol or ZapfDingbats
- * @return false on failure, true on success
+ * @treturn boolean false on failure, true on success
  */
 static int l_pdf_set_font( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -148,6 +154,7 @@ static int l_pdf_set_font( lua_State * L ) {
 
 /**
  * Calculate the width of a given string in the current font
+ * @function get_font_text_width
  * @param font_name Name of the font to get the width of.
  *  This must be one of the standard PDF fonts:
  *  Courier, Courier-Bold, Courier-BoldOblique, Courier-Oblique,
@@ -156,7 +163,7 @@ static int l_pdf_set_font( lua_State * L ) {
  *  Symbol or ZapfDingbats
  * @param text Text to determine width of
  * @param size Size of the text, in points
- * @return false on failure, text_width calculated width in
+ * @treturn mixed false on failure, text_width calculated width in
  */
 static int l_pdf_get_font_text_width( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -180,13 +187,14 @@ static int l_pdf_get_font_text_width( lua_State * L ) {
 
 /**
  * Add a text string to the document
+ * @function add_text
  * @param page Page to add object to (NULL => most recently added page)
  * @param text String to display
  * @param size Point size of the font
  * @param xoff X location to put it in
  * @param yoff Y location to put it in
  * @param colour Colour to draw the text
- * @return true on success, false on failure
+ * @treturn boolean true on success, false on failure
  */
 static int l_pdf_add_text( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -212,6 +220,7 @@ static int l_pdf_add_text( lua_State * L ) {
 
 /**
  * Add an outline rectangle to the document
+ * @function add_rectangle
  * @param page Page to add object to (NULL => most recently added page)
  * @param x X offset to start rectangle at
  * @param y Y offset to start rectangle at
@@ -219,7 +228,7 @@ static int l_pdf_add_text( lua_State * L ) {
  * @param height Height of rectangle
  * @param border_width Width of rectangle border
  * @param colour Colour to draw the rectangle
- * @return true success, false on failure
+ * @treturn boolean true success, false on failure
  */
 static int l_pdf_add_rectangle( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -248,6 +257,7 @@ static int l_pdf_add_rectangle( lua_State * L ) {
 
 /**
  * Add a filled rectangle to the document
+ * @function add_filled_rectangle 
  * @param page Page to add object to (NULL => most recently added page)
  * @param x X offset to start rectangle at
  * @param y Y offset to start rectangle at
@@ -256,7 +266,7 @@ static int l_pdf_add_rectangle( lua_State * L ) {
  * @param border_width Width of rectangle border
  * @param colour_fill Colour to fill the rectangle
  * @param colour_border Colour to draw the rectangle
- * @return true success, false on failure
+ * @treturn boolean true success, false on failure
  */
 static int l_pdf_add_filled_rectangle( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -287,6 +297,7 @@ static int l_pdf_add_filled_rectangle( lua_State * L ) {
 
 /**
  * Add a line to the document
+ * @function add_line 
  * @param page Page to add object to (NULL => most recently added page)
  * @param x1 X offset of start of line
  * @param y1 Y offset of start of line
@@ -294,7 +305,7 @@ static int l_pdf_add_filled_rectangle( lua_State * L ) {
  * @param y2 Y offset of end of line
  * @param width Width of the line
  * @param colour Colour to draw the line
- * @return true success, false on failure
+ * @treturn boolean true success, false on failure
  */
 static int l_pdf_add_line( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -329,13 +340,14 @@ static int l_pdf_add_line( lua_State * L ) {
  * Passing a negative number either the display height or width will
  * have the image be resized while keeping the original aspect ratio.
  * Supports image formats: JPEG, PNG, PPM, PGM & BMP
+ * @function add_image_file 
  * @param page Page to add image to (NULL => most recently added page)
  * @param x X offset to put image at
  * @param y Y offset to put image at
  * @param display_width Displayed width of image
  * @param display_height Displayed height of image
  * @param image_filename Filename of image file to display
- * @return < 0 on failure, >= 0 on success
+ * @treturn bbolean false on failure, true on success
  */
 static int l_pdf_add_image_file( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -364,10 +376,11 @@ static int l_pdf_add_image_file( lua_State * L ) {
 
 /**
  * Add a bookmark to the document
+ * @function add_bookmark 
  * @param page Page to jump to for bookmark
-               (or NULL for the most recently added page)
+ * (or NULL for the most recently added page)
  * @param parent ID of a previously created bookmark that is the parent
-               of this one. -1 if this should be a top-level bookmark.
+ * of this one. -1 if this should be a top-level bookmark.
  * @param name String to associate with the bookmark
  * @return false on failure, new bookmark id on success
  */
@@ -396,7 +409,7 @@ static int l_pdf_add_bookmark( lua_State * L ) {
  * Add a link annotation to the document
  * @function add_link 
  * @param page Page that holds the clickable rectangle
-               (or NULL for the most recently added page)
+ * (or NULL for the most recently added page)
  * @param x X coordinate of bottom LHS corner of clickable rectangle
  * @param y Y coordinate of bottom LHS corner of clickable rectangle
  * @param width width of clickable rectangle
@@ -453,9 +466,8 @@ static int l_pdf_append_page( lua_State * L ) {
 
 /**
  * Retrieve a page by its number.
- *
+ * @function get_page
  * Note: The page must have already been created via \ref pdf_append_page
- *
  * @param page_number Page number to retrieve, starting from 1.
  * @return Page object if the given page is found, NULL otherwise
  */
@@ -472,9 +484,39 @@ static int l_pdf_get_page( lua_State * L ) {
   return 1;
 }
 
+/***
+ * Adjust the width/height of a specific page
+ * @function page_set_size
+ * @param page object returned from @ref pdf_append_page
+ * @param width Width of the page in points
+ * @param height Height of the page in points
+ * @treturn boolean false on failure, true on success
+ */
+static int l_pdf_page_set_size( lua_State * L ) {
+  ctx_t *ctx = ctx_check(L, 1);
+  struct pdf_object *page = NULL;
+  if ( lua_islightuserdata(L, 2) ){
+    page = lua_touserdata(L, 2);
+  }
+  float width   = luaL_checknumber(L, 3);
+  float height  = luaL_checknumber(L, 4);
+
+  int result = pdf_page_set_size(
+    ctx->pdf, page, width, height
+  );
+
+  if ( result < 0 ){
+    lua_pushboolean(L, 0);
+  }else if (result >= 0) {
+    lua_pushboolean(L, 1);
+  }
+
+  return 1;
+}
+
 /**
- * Add a text string to the document, making it wrap if it is too
- * long
+ * Add a text string to the document, making it wrap if it is too long
+ * @function add_text_wrap
  * @param page Page to add object to (NULL => most recently added page)
  * @param text String to display
  * @param size Point size of the font
@@ -484,7 +526,7 @@ static int l_pdf_get_page( lua_State * L ) {
  * @param colour Colour to draw the text
  * @param wrap_width Width at which to wrap the text
  * @param align Text alignment (see PDF_ALIGN_xxx)
- * @return false on failure, the final height on success
+ * @treturn mixed false on failure, the final height on success
  */
 static int l_pdf_add_text_wrap( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -518,6 +560,7 @@ static int l_pdf_add_text_wrap( lua_State * L ) {
 
 /**
  * Add a text string to the document at a rotated angle
+ * @function add_text_rotate
  * @param page Page to add object to (NULL => most recently added page)
  * @param text String to display
  * @param size Point size of the font
@@ -525,7 +568,7 @@ static int l_pdf_add_text_wrap( lua_State * L ) {
  * @param yoff Y location to put it in
  * @param angle Rotation angle of text (in radians)
  * @param colour Colour to draw the text
- * @return 0 on success, < 0 on failure
+ * @treturn boolean true on success, false on failure
  */
 static int l_pdf_add_text_rotate( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -556,8 +599,9 @@ static int l_pdf_add_text_rotate( lua_State * L ) {
 
 /**
  * Save the given pdf document to the supplied filename.
+ * @function save
  * @param filename Name of the file to store the PDF into (NULL for stdout)
- * @return false on failure, true on success
+ * @treturn boolean false on failure, true on success
  */
 static int l_pdf_save( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -576,7 +620,8 @@ static int l_pdf_save( lua_State * L ) {
 
 /**
  * Retrieves a PDF document height
- * @return height of PDF document (in points)
+ * @function height
+ * @treturn number height of PDF document (in points)
  */
 static int l_pdf_height( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -587,7 +632,8 @@ static int l_pdf_height( lua_State * L ) {
 
 /**
  * Retrieves a PDF document width
- * @return width of PDF document (in points)
+ * @function width
+ * @treturn number width of PDF document (in points)
  */
 static int l_pdf_width( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -596,9 +642,33 @@ static int l_pdf_width( lua_State * L ) {
   return 1;
 }
 
+/**
+ * Retrieves page height
+ * @function page_height
+ * @param page Page object to get height of
+ * @treturn number height of page (in points)
+ */
+static int l_pdf_page_height( lua_State * L ) {
+  struct pdf_object *page = lua_touserdata(L, 2);
+  lua_pushinteger(L, pdf_page_height(page) );
+  return 1;
+}
+
+/**
+ * Retrieves page width
+ * @function page_width
+ * @param page Page object to get width of
+ * @treturn number width of page (in points)
+ */
+static int l_pdf_page_width( lua_State * L ) {
+  struct pdf_object *page = lua_touserdata(L, 2);
+  lua_pushinteger(L, pdf_page_width(page));
+  return 1;
+}
 
 /**
  * Add a barcode to the document
+ * @function add_barcode
  * @param page Page to add barcode to (NULL => most recently added page)
  * @param code Type of barcode to add (PDF_BARCODE_xxx)
  * @param x X offset to put barcode at
@@ -639,8 +709,9 @@ static int l_pdf_add_barcode( lua_State * L ) {
 
 /**
  * Retrieve the error message if any operation fails
+ * @function get_err
  * @param errval optional pointer to an integer to be set to the error code
- * @return NULL if no error message, string description of error otherwise
+ * @treturn mixed NULL if no error message, string description of error otherwise
  */
 static int l_pdf_get_err( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -657,12 +728,26 @@ static int l_pdf_get_err( lua_State * L ) {
 
 /**
  * Convert a value in milli-meters into a number of points.
+ * @function mm_to_point
  * @param mm millimeter value to convert to points
+ * @treturn number 
  */
 static int l_pdf_mm_to_point( lua_State * L ) {
-  ctx_t *ctx = ctx_check(L, 1);
-  int mm     = luaL_checkinteger(L, 2);
+  int mm = luaL_checkinteger(L, 2);
   lua_pushnumber(L, PDF_MM_TO_POINT(mm));
+
+  return 1;
+}
+
+/**
+ * Convert a value in inches into a number of points.
+ * @function inch_to_point
+ * @param inch inches value to convert to points
+ * @treturn number 
+ */
+static int l_pdf_inch_to_point( lua_State * L ) {
+  int inch = luaL_checkinteger(L, 2);
+  lua_pushnumber(L, PDF_INCH_TO_POINT(inch));
 
   return 1;
 }
@@ -671,19 +756,8 @@ static int l_pdf_mm_to_point( lua_State * L ) {
  * Convert three 8-bit RGB values into a single packed 32-bit
  * colour. These 32-bit colours are used by various functions
  * in PDFGen
- */
-static int l_pdf_inch_to_point( lua_State * L ) {
-  ctx_t *ctx = ctx_check(L, 1);
-  int inch   = luaL_checkinteger(L, 2);
-  lua_pushnumber(L, PDF_INCH_TO_POINT(inch));
-
-  return 1;
-}
-
-/**
- * Convert a value in inches into a number of points.
- * @param inch inches value to convert to points
- */
+ * @function rgb
+*/
 static int l_pdf_rgb( lua_State * L ) {
   int r   = luaL_checkinteger(L, 1);
   int g   = luaL_checkinteger(L, 2);
@@ -698,6 +772,7 @@ static int l_pdf_rgb( lua_State * L ) {
  * colour. These 32-bit colours are used by various functions
  * in PDFGen. Alpha values range from 0 (opaque) to 0xff
  * (transparent)
+ * @function argb
  */
 static int l_pdf_argb( lua_State * L ) {
   int a   = luaL_checkinteger(L, 1);
@@ -711,6 +786,7 @@ static int l_pdf_argb( lua_State * L ) {
 
 /**
  * Acknowledge an outstanding pdf error
+ * @function clear_err
  */
 static int l_pdf_clear_err( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -720,6 +796,7 @@ static int l_pdf_clear_err( lua_State * L ) {
 
 /**
  * Destroy the pdf object, and all of its associated memory
+ * @function destroy
  */
 static int l_pdf_destroy( lua_State * L ) {
   ctx_t *ctx = ctx_check(L, 1);
@@ -748,9 +825,12 @@ static const struct luaL_Reg meths [] = {
   {"add_image_file", l_pdf_add_image_file},
   {"height", l_pdf_height},
   {"width", l_pdf_width},
+  {"page_width", l_pdf_page_width},
+  {"page_height", l_pdf_page_height},
   {"add_bookmark", l_pdf_add_bookmark},
   {"add_link", l_pdf_add_link},
   {"get_page", l_pdf_get_page},
+  {"page_set_size", l_pdf_page_set_size},
   {"add_text_wrap", l_pdf_add_text_wrap},
   {"add_text_rotate", l_pdf_add_text_rotate},
   {"add_filled_rectangle", l_pdf_add_filled_rectangle},
